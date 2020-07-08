@@ -60,13 +60,8 @@ def uploadToS3(file_obj:Path)->None:
     
     bucket = 'domfp13-s3-bucket' # Add your bucket here
     
-    s3_client = boto3.client('s3')
-    
-    #s3_client = boto3.client(
-    #    's3',
-    #    aws_access_key_id='',
-    #    aws_secret_access_key=''
-    #)
+    #s3_client = boto3.client('s3')
+    s3_client = boto3.client('s3', aws_access_key_id='', aws_secret_access_key='')
     
     prefix  = 'hr_bk_files/' # Add your prefix here
     object_name = "{prefix}{time}_{name}".format(prefix=prefix, time=datetime.now().strftime('%Y%m%d'), name=basename(file_obj))
@@ -74,30 +69,61 @@ def uploadToS3(file_obj:Path)->None:
     with open(file_obj, "rb") as f:
         s3_client.upload_fileobj(f, bucket, object_name)
 
-def extractAndDecrypt(local_files:list)->None:
-    """Loops throught the list, for each file the base name is changed for {base}_decrypted.csv
+def decrypt(filein:Path)->Path:
+    """Uses the GPG.exe file in order to decrypt the current file (filein)
 
     Args:
-        local_files (list): Paths for local lists "out"
+        filein (Path): Host path for the file that is being decryted.
+
+    Returns:
+        Path: Host path for the encrypted file.
     """
-
-    from os import getcwd
-
-    for file in local_files:
-        base_name = "{base}_decrypted.csv".format(base=file.stem)
-        decrypt(file, Path(getcwd(), 'out', base_name))
-
-def decrypt(filein:Path, fileout:Path):
 
     from os.path import exists
     from os import remove, system, getcwd
     from time import sleep
+    
+    try:
+        base_name = "{base}_decrypted.csv".format(base=filein.stem)
+        fileout = Path(getcwd(), 'out', base_name)
 
-    if exists(fileout):
-        remove(fileout)
+        if exists(fileout):
+            remove(fileout)
+        
+        #Decrypting
+        gpg = Path(getcwd(), 'gpg', 'bin', 'gpg.exe').absolute().as_posix()
+        system(f'{gpg} -d -o {fileout} {filein}')
+        sleep(5)
+        
+        return Path(getcwd(), 'out', base_name)
 
-    gpg = Path(getcwd(), 'gpg', 'bin', 'gpg.exe').absolute().as_posix()
-    #gpg = Path('.\\gpg\\bin\\gpg.exe').absolute().as_posix()
-    system(f'{gpg} -d -o {fileout} {filein}')
-    sleep(5)
-    system(f'taskkill /IM gpg.exe /f')
+    except Exception as e:
+        pass
+    finally:
+        # Kill gpg.exe process if still running
+        system(f'taskkill /IM gpg.exe /f')
+
+def dataframeTransformation(filein:Path)->None:
+    """Uses Pandas Dataframe to perform a trasformation based on Date.
+
+    Args:
+        filein (Path): Host path for the file that is being decryted.
+    """
+
+    import pandas as pd
+
+    # Using Dataframe to clean the file
+    data_test = pd.read_csv(filein, encoding="utf-8", nrows=2)
+    cols = list(data_test.columns)
+    date_cols = [x for x in cols if ('Date' in x and x != 'CFI - ServiceNow Manager Email As of Hire Date') or x == 'Last Day of Work']
+    data = pd.read_csv(filein, encoding="utf-8",
+                    parse_dates=date_cols,
+                    infer_datetime_format=True,
+                    error_bad_lines=False,
+                    low_memory=False)
+    
+    # Converting to CSV 
+    data.to_csv(filein, index=False)
+
+def copyFileToAnotherLocalDestination():
+    pass # Todo
