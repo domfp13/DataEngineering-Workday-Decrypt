@@ -44,10 +44,10 @@ if __name__ == '__main__':
             final_paths = list(map(decrypt, local_files))
 
             logger.info("04. Data Transfomation")
-            #list(map(dataframeTransformation, final_paths))
+            list(map(dataframeTransformation, final_paths))
 
             logger.info("05. Upload Encrypted files to s3")
-            #list(map(partial(uploadToS3, prefix='hr_files/'), final_paths)) # In python 3 map is lazy evaluation: each value is only computed when it's needed
+            list(map(partial(uploadToS3, prefix='hr_files/'), final_paths)) # In python 3 map is lazy evaluation: each value is only computed when it's needed
             
             logger.info("06. Copies files in output to other local destination")
             list(map(copyFileToAnotherLocalDestination, final_paths))
