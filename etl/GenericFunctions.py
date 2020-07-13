@@ -46,24 +46,25 @@ def moveFilesFromFTP(host_name:str, user_name:str, password:str)->list:
     finally:
         ssh_client.close()
 
-def uploadToS3(file_obj:Path)->None:
+def uploadToS3(file_obj:Path, prefix:str='hr_bk_files/')->None:
     """Uploads object to an S3 bucket, file is uploaded with a datetime prefix
     with the current day.
 
     Args:
-        file_obj (Path): pathlib Path
+        file_obj (Path): [description]
+        prefix (str, optional): [This is the AWS S3 bucket prefix]. Defaults to 'hr_bk_files/'.
     """
 
     from os.path import basename
     from datetime import datetime
     import boto3
+
     
     bucket = 'domfp13-s3-bucket' # Add your bucket here
     
-    #s3_client = boto3.client('s3')
-    s3_client = boto3.client('s3', aws_access_key_id='', aws_secret_access_key='')
+    s3_client = boto3.client('s3')
+    #s3_client = boto3.client('s3', aws_access_key_id='', aws_secret_access_key='')
     
-    prefix  = 'hr_bk_files/' # Add your prefix here
     object_name = "{prefix}{time}_{name}".format(prefix=prefix, time=datetime.now().strftime('%Y%m%d'), name=basename(file_obj))
     
     with open(file_obj, "rb") as f:
@@ -125,5 +126,14 @@ def dataframeTransformation(filein:Path)->None:
     # Converting to CSV 
     data.to_csv(filein, index=False)
 
-def copyFileToAnotherLocalDestination():
-    pass # Todo
+def copyFileToAnotherLocalDestination(filein:Path)->None:
+    """Copy file to Local Path
+
+    Args:
+        filein (Path): This is where the file is being save when donwloaded
+    """
+    from os import system
+    
+    #system("""copy {} c:\\Users\\lf188653\\Desktop\\ /Y""".format(filein))
+    system("""copy {} D:\QlikData\HR_Data\\ /Y""".format(filein))
+    
