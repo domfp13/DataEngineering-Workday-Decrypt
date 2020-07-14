@@ -35,7 +35,7 @@ def moveFilesFromFTP(host_name:str, user_name:str, password:str)->list:
                 local_file = Path(getcwd(),'out',file)
                 ftp.get(f'/Home/QlikFFIprod/{file}', local_file) # remote path, local path
                 files_out.append(local_file)
-                #ftp.remove(file)
+                ftp.remove(file)
             
             ftp.close() # sometimes with does not close the connection, therefore connection is explicitly closed
         
