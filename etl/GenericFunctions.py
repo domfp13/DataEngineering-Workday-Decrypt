@@ -57,15 +57,15 @@ def uploadToS3(file_obj:Path, prefix:str='hr_bk_files/')->None:
 
     from os.path import basename
     from datetime import datetime
+    from pytz import timezone
     import boto3
 
+    bucket = '' # Add your bucket here
     
-    bucket = 'domfp13-s3-bucket' # Add your bucket here
+    #s3_client = boto3.client('s3')
+    s3_client = boto3.client('s3', aws_access_key_id='', aws_secret_access_key='')
     
-    s3_client = boto3.client('s3')
-    #s3_client = boto3.client('s3', aws_access_key_id='', aws_secret_access_key='')
-    
-    object_name = "{prefix}{time}_{name}".format(prefix=prefix, time=datetime.now().strftime('%Y%m%d'), name=basename(file_obj))
+    object_name = "{prefix}{time}_{name}".format(prefix=prefix, time=datetime.now(timezone('US/Eastern')).strftime('%Y%m%d'), name=basename(file_obj))
     
     with open(file_obj, "rb") as f:
         s3_client.upload_fileobj(f, bucket, object_name)
