@@ -1,2 +1,2 @@
 @ECHO OFF
-C:\Users\lf188653\AppData\Local\Continuum\anaconda3\Scripts\activate && conda activate workday-decrypt && cd C:\Users\lf188653\Desktop\DataEngineering-Workday-Decrypt\ && python main.py
+C:\ProgramData\Miniconda3\Scripts\activate && conda activate workday-decrypt && cd C:\ProgramData\Scripts\DataEngineering-Workday-Decrypt\ && python main.py
