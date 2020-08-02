@@ -35,7 +35,7 @@ def moveFilesFromFTP(host_name:str, user_name:str, password:str)->list:
                 local_file = Path(getcwd(),'out',file)
                 ftp.get(f'/Home/QlikFFIprod/{file}', local_file) # remote path, local path
                 files_out.append(local_file)
-                ftp.remove(file)
+                #ftp.remove(file)
             
             ftp.close() # sometimes with does not close the connection, therefore connection is explicitly closed
         
@@ -46,7 +46,7 @@ def moveFilesFromFTP(host_name:str, user_name:str, password:str)->list:
     finally:
         ssh_client.close()
 
-def uploadToS3(file_obj:Path, prefix:str='hr_bk_files/')->None:
+def uploadToS3(file_obj:Path, prefix:str='hr_bk_files')->None:
     """Uploads object to an S3 bucket, file is uploaded with a datetime prefix
     with the current day.
 
@@ -65,7 +65,9 @@ def uploadToS3(file_obj:Path, prefix:str='hr_bk_files/')->None:
     #s3_client = boto3.client('s3')
     s3_client = boto3.client('s3', aws_access_key_id='', aws_secret_access_key='')
     
-    object_name = "{prefix}{time}_{name}".format(prefix=prefix, time=datetime.now(timezone('US/Eastern')).strftime('%Y%m%d'), name=basename(file_obj))
+    time = datetime.now(timezone('US/Eastern')).strftime('%Y%m%d')
+
+    object_name = "{prefix}/{year}/{month}/{day}/{name}".format(prefix=prefix, year=time[0:4], month=time[4:6], day=time[6:], name=basename(file_obj))
     
     with open(file_obj, "rb") as f:
         s3_client.upload_fileobj(f, bucket, object_name)

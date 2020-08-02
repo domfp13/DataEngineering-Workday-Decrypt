@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Luis Enrique Fuentes Plata
 
-
 #External Libs
 from typing import Optional
 from functools import partial
@@ -38,7 +37,7 @@ if __name__ == '__main__':
         if len(local_files)>0:
 
             logger.info("02. Upload Encrypted files to s3")
-            list(map(partial(uploadToS3, prefix='hr_bk_files/'), local_files)) # In python 3 map is lazy evaluation: each value is only computed when it's needed
+            list(map(partial(uploadToS3, prefix='hr_bk_files'), local_files)) # In python 3 map is lazy evaluation: each value is only computed when it's needed
 
             logger.info("03. Extracting files")
             final_paths = list(map(decrypt, local_files))
@@ -47,7 +46,7 @@ if __name__ == '__main__':
             list(map(dataframeTransformation, final_paths))
 
             logger.info("05. Upload Encrypted files to s3")
-            list(map(partial(uploadToS3, prefix='hr_files/'), final_paths)) # In python 3 map is lazy evaluation: each value is only computed when it's needed
+            list(map(partial(uploadToS3, prefix='hr_files'), final_paths)) # In python 3 map is lazy evaluation: each value is only computed when it's needed
             
             logger.info("06. Copies files in output to other local destination")
             list(map(copyFileToAnotherLocalDestination, final_paths))
